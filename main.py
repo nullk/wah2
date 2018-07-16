@@ -16,25 +16,25 @@ app = Flask(__name__)
 
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['Testing'] = True
-app.config['Debug'] = True
+app.config['Debug'] = False
+app.config["SERVER_HOST"] = '0.0.0.0:5000'
 
 socketio = SocketIO(app)
-
-conn = sqlite3.connect('watch.db')
-c = conn.cursor()
 
 # TODO: Cache volume slider, Loading page, Video quality
 
 clients = []
 
 def init_db():
-    c.execute('''CREATE TABLE history
-        (date date, id text)''')
-    conn.commit()
+    with sqlite3.connect('watch.db') as conn:
+        conn.cursor().execute('''CREATE TABLE history
+            (date date, id text)''')
+        conn.commit()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    with sqlite3.connect('watch.db') as conn:
+        return render_template('index.html')
 
 @socketio.on('joined')
 def handle_connect():
@@ -44,8 +44,21 @@ def handle_connect():
     room = session.get('room')
     join_room(room)
 
-    most_recent_id = c.execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1]
+    with sqlite3.connect('watch.db') as conn:
+        most_recent_id = conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1]
     emit('new-user-sync', str(most_recent_id), room=clients[-1])
+
+@socketio.on('disconnect')
+def handle_dc():
+    i = 0
+    print '-------------------------------'
+    print request.sid + ' has disconnected'
+    print '-------------------------------'
+    for client in clients:
+        i += 1
+        if client == request.sid:
+            print client
+            del clients[i] 
 
 # Play / Pause
 @socketio.on('client-play')
@@ -64,11 +77,13 @@ def play_new(data):
     yt_re = r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)'
     yt_id = re.findall(yt_re, data["url"])
 
-    c.execute('INSERT INTO history VALUES (?,?)',
-        [datetime.datetime.now(), yt_id[0][3]])
-    conn.commit()
+    with sqlite3.connect('watch.db') as conn:
+        #if conn.cursor().execute("SELECT * FROM history WHERE id LIKE '"+yt_id[0][3]+"'").fetchall() == []:
+        conn.cursor().execute('INSERT INTO history VALUES (?,?)',
+            [datetime.datetime.now(), yt_id[0][3]])
+        conn.commit()
 
-    emit('server-play-new', yt_id[0][3], broadcast=True)
+    emit('server-play-new', {'id': yt_id[0][3], 'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, broadcast=True)
 
 @socketio.on('client-skip')
 def handle_skip(data):

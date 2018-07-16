@@ -31,20 +31,35 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
   <script type="text/javascript" src="/static/js/main.js"></script>
-  <script>
+  <script type="text/javascript">
+    // Initialize socket events
+    socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        socket.emit('joined');
+    });
+
+    socket.on('new-user-sync', function(id) {
+        window.onload = function() {
+            console.log(id);
+            player.loadVideoById(id);
+            player.playVideo();
+        }
+    });
+
     socket.on('server-skip', function(time) {
-          player.seekTo(time);
-          player.playVideo();
+        player.seekTo(time);
+        player.playVideo();
     });
 
     // Play / Pause ------------------------->
     socket.on('server-play', function(time) {
-    console.log("Received play socket")
+        console.log("Received play socket")
         player.seekTo(time);
         player.playVideo();
     });
     socket.on('server-pause', function(time) {
-    console.log("Received pause socket")
+        console.log("Received pause socket")
         player.seekTo(time);
         player.pauseVideo();
     });
@@ -58,8 +73,11 @@
     // -------------------------------------->
 
     // Process playing new video ------------>
-    socket.on('server-play-new', function(id) {
-        player.loadVideoById(id);
+    socket.on('server-play-new', function(data) {
+        player.loadVideoById(data["id"]);
+        for (history in data["history"]) {
+          $('#history-list').append('<tr>'+history+'</tr>');
+        }
         player.seekTo(0);
         player.playVideo();
     });
@@ -111,11 +129,13 @@
             }
           });
         </script>
-        <table id="user-list" class="u-full-width">
-          <thead>
-            <tr></tr>
-          </thead>
-        </table>
+      </div>
+    <div class="one-third column" style="margin-top: 5%">
+      <table id="history-list" class="u-full-width">
+        <thead>
+          <tr>t</tr>
+        </thead>
+      </table>
     </div>
   </div>
 
