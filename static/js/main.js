@@ -10,7 +10,9 @@ window.onYouTubeIframeAPIReady = function() {
             color: 'white',
             controls: 0,
             rel: 0,
-            showinfo: 0
+            showinfo: 0,
+            'origin': 'http://jiejie.stream',
+            'frameborder': 0
         },
         events: {
             onReady: initialize,

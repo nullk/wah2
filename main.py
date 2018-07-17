@@ -5,12 +5,13 @@
     By Jacob Courtemarche
 
     Libraries required:
-    eventlet, flask, flask_socketio 
+    eventlet, flask, flask_socketio, gdata
 """
 
 from flask import Flask, render_template, Blueprint, request, session
 from flask_socketio import SocketIO, send, emit, join_room
-import sqlite3, datetime, re
+import sqlite3, datetime, re, urllib, urllib2, json
+from api import API_KEY
 
 app = Flask(__name__)
 
@@ -18,6 +19,21 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['Testing'] = True
 app.config['Debug'] = False
 app.config["SERVER_HOST"] = '0.0.0.0:5000'
+
+def search_yt(query):
+    query = str(urllib.quote(query))
+    url = "https://www.googleapis.com/youtube/v3/search?maxResults=20&type=video&order=rating&q="+query+"&key="+API_KEY+"&part=id%2Csnippet"
+    feed = urllib2.urlopen(url).read()
+    return json.loads(feed)["items"]
+
+# Tool that checks if valid youtube video
+def check_yt(id):
+    url = "https://www.googleapis.com/youtube/v3/videos?id="+id+"&key="+API_KEY+"&part=contentDetails"
+    feed = urllib2.urlopen(url).read()
+    if json.loads(feed)["items"] != []:
+        return True
+    else:
+        return False
 
 socketio = SocketIO(app)
 
@@ -44,8 +60,7 @@ def handle_connect():
     join_room(room)
 
     with sqlite3.connect('watch.db') as conn:
-        most_recent_id = conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1]
-    emit('new-user-sync', str(most_recent_id), room=clients[-1])
+        emit('new-user-sync', {'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, room=clients[-1])
 
 @socketio.on('disconnect')
 def handle_dc():
@@ -76,13 +91,17 @@ def play_new(data):
     yt_re = r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([-\w]+)'
     yt_id = re.findall(yt_re, data["url"])
 
-    with sqlite3.connect('watch.db') as conn:
-        #if conn.cursor().execute("SELECT * FROM history WHERE id LIKE '"+yt_id[0][3]+"'").fetchall() == []:
-        conn.cursor().execute('INSERT INTO history VALUES (?,?)',
-            [datetime.datetime.now(), yt_id[0][3]])
-        conn.commit()
+    # Check if valid youtube url, if not serve search results
+    if yt_id == []:
+        emit('server-serve-list', {'results': search_yt(data["url"])}, room=request.sid)
+    else:
+        with sqlite3.connect('watch.db') as conn:
+            #if conn.cursor().execute("SELECT * FROM history WHERE id LIKE '"+yt_id[0][3]+"'").fetchall() == []:
+            conn.cursor().execute('INSERT INTO history VALUES (?,?)',
+                [datetime.datetime.now(), yt_id[0][3]])
+            conn.commit()
 
-    emit('server-play-new', {'id': yt_id[0][3], 'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, broadcast=True)
+        emit('server-play-new', {'id': yt_id[0][3], 'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, broadcast=True)
 
 @socketio.on('client-skip')
 def handle_skip(data):

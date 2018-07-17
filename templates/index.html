@@ -15,7 +15,7 @@
 
   <!-- FONT
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -41,7 +41,7 @@
 
     socket.on('new-user-sync', function(id) {
         window.onload = function() {
-            console.log(id);
+            console.log(data["history"])
             player.loadVideoById(id);
             player.playVideo();
         }
@@ -76,15 +76,27 @@
     socket.on('server-play-new', function(data) {
         player.loadVideoById(data["id"]);
         for (history in data["history"]) {
-          $('#history-list').append('<tr>'+history+'</tr>');
+          //$('#history-list').append('<tr>'+history+'</tr>');
         }
         player.seekTo(0);
         player.playVideo();
     });
 
-    controlPlayNew = function() {
-        socket.emit('client-play-new', {url: $("#yt-url").val()});
+    controlPlayNew = function(url) {
+        socket.emit('client-play-new', {url: url});
     };
+
+    socket.on('server-serve-list', function(data) {
+      $("#search-list").empty();
+      $("#search").css("display", "block");
+      for (result in data["results"]) {
+        $("#search-list").append("<tr><td><div class='search-result' onclick='controlPlayNew(\"https://www.youtube.com/watch?v="+data["results"][result]["id"]["videoId"]+"\")' style='cursor:pointer'>"+data["results"][result]["snippet"]["title"]+"</td><td><img class='thumbnail' src='"+data["results"][result]["snippet"]["thumbnails"]["default"]["url"]+"'/></td></div></tr>");
+      }
+      if (data["results"].length == 0) {
+        $("#search-list").append("<tr><td>No results found.</td></tr>");
+      }
+    });
+
   </script>
 
   <!-- Favicon
@@ -121,21 +133,34 @@
             player.setVolume($("#volume-slider").val());
           });  
         </script>
-        <input type="text" class="u-full-width" id="yt-url" placeholder="Enter Youtube URL Here"></input>
+        <input type="text" class="u-full-width" id="yt-url" placeholder="Search or Enter URL"></input>
         <script>
           $('#yt-url').on("keydown", function(event) {
             if (event.which == 13) {
-              controlPlayNew();
+              controlPlayNew($("#yt-url").val());
             }
           });
         </script>
       </div>
     <div class="one-third column" style="margin-top: 5%">
-      <table id="history-list" class="u-full-width">
-        <thead>
-          <tr>t</tr>
-        </thead>
-      </table>
+      <div class="container" id="search">
+        <div class="row">
+          <div class="two-thirds column">
+            <h6><b>Search results</b></h6>
+          </div>
+          <div class="one-third column">
+            <i style="color:red;font-size:24px;cursor:pointer;margin-left:85%" id="close-search" class="fas fa-times-circle"></i>
+          </div>
+        </div>
+        <div class="row">
+          <table id="search-list" class="u-full-width"></table>
+        </div>
+      </div>
+      <script>
+        $("#close-search").on('click', function() {
+          $("#search").hide();
+        });
+      </script>
     </div>
   </div>
 
