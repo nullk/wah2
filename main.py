@@ -22,7 +22,7 @@ app.config["SERVER_HOST"] = '0.0.0.0:5000'
 
 def search_yt(query):
     query = str(urllib.quote(query))
-    url = "https://www.googleapis.com/youtube/v3/search?maxResults=20&type=video&order=rating&q="+query+"&key="+API_KEY+"&part=id%2Csnippet"
+    url = "https://www.googleapis.com/youtube/v3/search?maxResults=20&type=video&order=relevance&q="+query+"&key="+API_KEY+"&part=id%2Csnippet"
     feed = urllib2.urlopen(url).read()
     return json.loads(feed)["items"]
 
