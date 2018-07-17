@@ -33,8 +33,7 @@ def init_db():
 
 @app.route('/')
 def index():
-    with sqlite3.connect('watch.db') as conn:
-        return render_template('index.html')
+    return render_template('index.html')
 
 @socketio.on('joined')
 def handle_connect():
