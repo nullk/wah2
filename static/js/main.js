@@ -33,13 +33,13 @@ window.initialize = function(event) {
     $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
     $("#page-author").html('By ' + event.target.getVideoData()["author"]);
     updateProgressBar();
-    updateTimerDisplay()
+    updateTimerDisplay();
 
     // Start interval to update elapsed time display and
     // the elapsed part of the progress bar every second.
     var time_update_interval = setInterval(function () {
         updateProgressBar();
-        updateTimerDisplay()
+        updateTimerDisplay();
     }, 1000)
 };
 
@@ -56,8 +56,8 @@ function updateProgressBar(){
 
 function updateTimerDisplay(){
     // Update current time text display.
-    $('#current-time').text(formatTime( player.getCurrentTime() ));
-    $('#duration').text(formatTime( player.getDuration() ));
+    $('#current-time').text(formatTime( player.getCurrentTime()));
+    $('#duration').text(formatTime( player.getDuration()));
 }
 
 function formatTime(time){
