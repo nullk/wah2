@@ -38,7 +38,7 @@ def check_yt(id):
 
 socketio = SocketIO(app)
 
-# TODO: Cache volume slider, Loading page, Video quality
+# TODO: Cache volume slider, Loading page, Video quality, Cleanup
 
 clients = []
 

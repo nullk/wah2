@@ -70,6 +70,12 @@
     };
     // -------------------------------------->
 
+    controlFullscreen = function() {
+      // Chrome only
+      var iframe = document.getElementById("video-placeholder");
+      iframe.webkitRequestFullScreen();
+    }
+
     // Process playing new video ------------>
     socket.on('server-play-new', function(data) {
         player.loadVideoById(data["id"]);
@@ -136,6 +142,8 @@
             player.setVolume($("#volume-slider").val());
           });  
         </script>
+        <button onclick="controlFullscreen()" style="float:right"><i class="fas fa-expand"></i></button>
+        <br />
         <input type="text" class="u-full-width" id="yt-url" placeholder="Search or Enter URL"></input>
         <script>
           $('#yt-url').on("keydown", function(event) {
