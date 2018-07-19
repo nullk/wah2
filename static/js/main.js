@@ -28,24 +28,15 @@ window.onYouTubeIframeAPIReady = function() {
     });
 }
 
-window.initialize = function(event) {
-    //player.setSize({width: $("#resize-video-frame").width, height: $("#resize-video-frame").height});
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
-    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
-    updateProgressBar();
-    updateTimerDisplay();
+function formatTime(time){
+    time = Math.round(time);
 
-    // Start interval to update elapsed time display and
-    // the elapsed part of the progress bar every second.
-    var time_update_interval = setInterval(function () {
-        updateProgressBar();
-        updateTimerDisplay();
-    }, 1000)
-};
+    var minutes = Math.floor(time / 60),
+    seconds = time - minutes * 60;
 
-window.stateChange = function(event) {
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
-    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    return minutes + ":" + seconds;
 }
 
 // This function is called by initialize()
@@ -56,17 +47,34 @@ function updateProgressBar(){
 
 function updateTimerDisplay(){
     // Update current time text display.
-    $('#current-time').text(formatTime( player.getCurrentTime()));
-    $('#duration').text(formatTime( player.getDuration()));
+    $('#current-time').text(formatTime(player.getCurrentTime()));
+    $('#duration').text(formatTime(player.getDuration()));
 }
 
-function formatTime(time){
-    time = Math.round(time);
+window.initialize = function(event) {
+    if (history_video_id != "") {
+        event.target.loadVideoById(history_video_id);
+        event.target.playVideo();
+    } else {
+        alert("Error: Please initialize database.");
+    }
 
-    var minutes = Math.floor(time / 60),
-    seconds = time - minutes * 60;
+    updateProgressBar();
+    updateTimerDisplay();
 
-    seconds = seconds < 10 ? '0' + seconds : seconds;
+    // Start interval to update elapsed time display and
+    // the elapsed part of the progress bar every second.
+    var time_update_interval = setInterval(function () {
+        updateProgressBar();
+        updateTimerDisplay();
+    }, 1000);
 
-    return minutes + ":" + seconds;
+    //player.setSize({width: $("#resize-video-frame").width, height: $("#resize-video-frame").height});
+    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
+    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
+};
+
+window.stateChange = function(event) {
+    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
+    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
 }

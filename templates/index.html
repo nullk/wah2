@@ -30,8 +30,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
   
-  <script type="text/javascript" src="/static/js/pace.min.js"></script>
-  <script type="text/javascript" src="/static/js/main.js"></script>
+  <script type="text/javascript" src="../static/js/pace.min.js"></script>
   <script type="text/javascript">
     // Initialize socket events
     socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -39,13 +38,11 @@
     socket.on('connect', function() {
         socket.emit('joined');
     });
+    
+    history_video_id = "";
 
     socket.on('new-user-sync', function(id) {
-        window.onload = function() {
-            console.log(data["history"])
-            player.loadVideoById(id);
-            player.playVideo();
-        }
+      history_video_id = id["id"];
     });
 
     socket.on('server-skip', function(time) {
@@ -76,9 +73,9 @@
     // Process playing new video ------------>
     socket.on('server-play-new', function(data) {
         player.loadVideoById(data["id"]);
-        for (history in data["history"]) {
+        //for (history in data["history"]) {
           //$('#history-list').append('<tr>'+history+'</tr>');
-        }
+        //}
         player.seekTo(0);
         player.playVideo();
     });
@@ -89,16 +86,17 @@
 
     socket.on('server-serve-list', function(data) {
       $("#search-list").empty();
-      $("#search").css("display", "block");
       for (result in data["results"]) {
         $("#search-list").append("<tr><td><div class='search-result' onclick='controlPlayNew(\"https://www.youtube.com/watch?v="+data["results"][result]["id"]["videoId"]+"\")' style='cursor:pointer'>"+data["results"][result]["snippet"]["title"]+"</td><td><img class='thumbnail' src='"+data["results"][result]["snippet"]["thumbnails"]["default"]["url"]+"'/></td></div></tr>");
       }
       if (data["results"].length == 0) {
         $("#search-list").append("<tr><td>No results found.</td></tr>");
       }
+      $("#search").css("display", "block");
     });
 
   </script>
+  <script type="text/javascript" src="../static/js/main.js"></script>
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -116,18 +114,19 @@
         <h6 id="page-author" style="margin-top: -4%"></h6>
         <div id="video-placeholder"></div>
         <script src="https://www.youtube.com/iframe_api"></script>
-        <input type="range" class="u-full-width" id="progress-bar"></input>
+        <input type="range" class="u-full-width" id="progress-bar" value="0"></input>
         <script>
           $('#progress-bar').on('mouseup touchend', function (e) {
               // Calculate the new time for the video.
-              // new time in seconds = total duration in seconds * ( value of range input / 100 )
               var newTime = player.getDuration() * (e.target.value / 100);
               socket.emit('client-skip', {time: newTime});
           });
         </script>
-        <br />
-        <h6 style="float:left" id="current-time"><h6 style="float:left">&nbsp;/&nbsp;</h6></h6><h6 style="float:left" id="duration"></h6>
-        <br />
+        <div id="duration-container">
+          <h6 id="current-time"></h6>
+          <h6>&nbsp;/&nbsp;</h6>
+          <h6 id="duration"></h6>
+        </div>
         <br />
         <button onclick="controlPlay()"><i class="fas fa-play"></i></button>
         <button onclick="controlPause()"><i class="fas fa-pause"></i></button>

@@ -460,6 +460,10 @@ there.
 }
 
 /* Custom CSS */
+#video-placeholder {
+  margin-bottom: -7px;
+}
+
 #volume-slider {
   cursor: pointer;
   background: #E1E1E1;
@@ -494,4 +498,35 @@ table {
 }
 #search .thumbnail {
   border-radius: 5px;
+}
+
+#duration-container {
+  background: linear-gradient(to bottom right, #1EAEDB, #0FA0CE);
+  border-top: 2px solid rgb(23, 132, 165);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: white;
+  padding: 5px;
+  width: auto;
+  height: 22px;
+  overflow: hidden;
+  margin-top: -15px;
+  text-indent: 1em;
+}
+#duration-container h6 {
+  float: left;
+}
+
+#progress-bar {
+  cursor: pointer;
+  background: #eee;
+  height: 20px;
+  -webkit-appearance: none;
+}
+#progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 16px;
+  background: #ccc;
+  cursor: pointer;
 }

@@ -60,7 +60,10 @@ def handle_connect():
     join_room(room)
 
     with sqlite3.connect('watch.db') as conn:
-        emit('new-user-sync', {'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, room=clients[-1])
+        emit('new-user-sync', {
+            'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall(),
+            'id': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1],
+        }, room=clients[-1])
 
 @socketio.on('disconnect')
 def handle_dc():
