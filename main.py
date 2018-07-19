@@ -10,7 +10,7 @@
 
 from flask import Flask, render_template, Blueprint, request, session
 from flask_socketio import SocketIO, send, emit, join_room
-import sqlite3, datetime, re, urllib, urllib2, json
+import sqlite3, datetime, re, urllib, urllib2, json, operator
 from api import API_KEY
 
 app = Flask(__name__)
@@ -28,10 +28,11 @@ def search_yt(query):
 
 # Tool that checks if valid youtube video
 def check_yt(id):
-    url = "https://www.googleapis.com/youtube/v3/videos?id="+id+"&key="+API_KEY+"&part=contentDetails"
+    url = "https://www.googleapis.com/youtube/v3/videos?id="+id+"&key="+API_KEY+"&part=snippet"
     feed = urllib2.urlopen(url).read()
-    if json.loads(feed)["items"] != []:
-        return True
+    res = json.loads(feed)["items"][0]["snippet"]
+    if res != []:
+        return res["title"]
     else:
         return False
 
@@ -50,6 +51,34 @@ def init_db():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/stats')
+def stats():
+    with sqlite3.connect('watch.db') as conn:
+        history = conn.cursor().execute("SELECT * FROM history ORDER BY id ASC").fetchall()
+        hdict = dict()
+
+        cur = history[0][1]
+        x = 0 
+        y = 0
+        title = ''
+        for h in history:
+            if x <= 10:
+                if h[1] == cur:
+                    y += 1
+                    if title == '':
+                        title = check_yt(h[1])
+                    hdict.update({title: y+1})
+                else:
+                    # Reset
+                    title = ''
+                    y = 0
+                    x += 1
+                cur = h[1]
+            else:
+                break
+
+        return render_template('stats.html', history=hdict)
 
 @socketio.on('joined')
 def handle_connect():
