@@ -460,27 +460,24 @@ there.
 }
 
 /* Custom CSS */
+
 #video-placeholder {
   margin-bottom: -7px;
 }
 
 #volume-slider {
-  cursor: pointer;
-  background: #E1E1E1;
-  height: 3px;
   -webkit-appearance: none;
+  background: #E1E1E1;
+  cursor: pointer;
+  height: 3px;
 }
-*:focus {
-  outline: none;
-}
-
 #volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
+  background: #1EAEDB;
+  border-radius: 25px;
+  cursor: pointer;
   height: 16px;
   width: 16px;
-  border-radius: 25px;
-  background: #1EAEDB;
-  cursor: pointer;
 }
 
 table {
@@ -493,16 +490,30 @@ table {
   width: 500px;
   height: 750px;
   padding: 15px;
+  overflow-x: hidden;
   overflow-y: scroll;
   display: none;
+  margin: 0 auto;
 }
 #search .thumbnail {
   border-radius: 5px;
 }
+#search .search-result:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+#search .search-result {
+  width: 300px;
+  height: 100px;
+  overflow: hidden;
+  float: right;
+}
+
+#controls {
+  margin-top: -10px;
+}
 
 #duration-container {
-  background: linear-gradient(to bottom right, #1EAEDB, #0FA0CE);
-  border-top: 2px solid rgb(23, 132, 165);
+  background: #303030;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: white;
@@ -519,7 +530,7 @@ table {
 
 #progress-bar {
   cursor: pointer;
-  background: #eee;
+  background: linear-gradient(to bottom right, #1EAEDB, rgb(11, 122, 156));
   height: 20px;
   -webkit-appearance: none;
 }
@@ -529,8 +540,4 @@ table {
   width: 16px;
   background: #ccc;
   cursor: pointer;
-}
-
-#stats-chart {
-  
 }

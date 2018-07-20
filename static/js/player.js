@@ -5,13 +5,12 @@ https://demo.tutorialzine.com/2015/08/how-to-control-youtubes-video-player-with-
 
 */
 
-var player;
-var socket;
+var player, socket;
 
-window.onYouTubeIframeAPIReady = function() {
+window.onYouTubeIframeAPIReady = function () {
     player = new YT.Player('video-placeholder', {
         width: $("#progress-bar").width(),
-        height: 400,
+        height: 447,
         videoId: 'gMslUkDaDZA',
         playerVars: {
             color: 'white',
@@ -26,13 +25,13 @@ window.onYouTubeIframeAPIReady = function() {
             onStateChange: stateChange
         }
     });
-}
+};
 
-function formatTime(time){
+function formatTime(time) {
     time = Math.round(time);
 
     var minutes = Math.floor(time / 60),
-    seconds = time - minutes * 60;
+        seconds = time - minutes * 60;
 
     seconds = seconds < 10 ? '0' + seconds : seconds;
 
@@ -40,18 +39,18 @@ function formatTime(time){
 }
 
 // This function is called by initialize()
-function updateProgressBar(){
+function updateProgressBar() {
     // Update the value of our progress bar accordingly.
     $('#progress-bar').val((player.getCurrentTime() / player.getDuration()) * 100);
 }
 
-function updateTimerDisplay(){
+function updateTimerDisplay() {
     // Update current time text display.
     $('#current-time').text(formatTime(player.getCurrentTime()));
     $('#duration').text(formatTime(player.getDuration()));
 }
 
-window.initialize = function(event) {
+window.initialize = function (event) {
     if (history_video_id != "") {
         event.target.loadVideoById(history_video_id);
         event.target.playVideo();
@@ -70,11 +69,11 @@ window.initialize = function(event) {
     }, 1000);
 
     //player.setSize({width: $("#resize-video-frame").width, height: $("#resize-video-frame").height});
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
-    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
+    $("#page-title").html("<a href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
+    $("#page-author").html('~ ' + event.target.getVideoData()["author"]);
 };
 
-window.stateChange = function(event) {
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v="+event.target.getVideoData()["video_id"]+"'>"+event.target.getVideoData()["title"]+"</a>");
-    $("#page-author").html('By ' + event.target.getVideoData()["author"]);
-}
+window.stateChange = function (event) {
+    $("#page-title").html("<a href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
+    $("#page-author").html('~ ' + event.target.getVideoData()["author"]);
+};
