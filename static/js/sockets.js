@@ -1,5 +1,5 @@
 // Initialize socket events ------------->
-socket = io.connect('http://' + document.domain + ':' + location.port);
+socket = io.connect('https://' + document.domain + ':' + location.port);
 
 // Handle Connect ----------------------->
 socket.on('connect', function () {

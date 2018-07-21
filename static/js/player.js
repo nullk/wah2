@@ -17,7 +17,7 @@ window.onYouTubeIframeAPIReady = function () {
             controls: 0,
             rel: 0,
             showinfo: 0,
-            'origin': 'http://jiejie.stream',
+            'origin': 'https://jiejie.stream',
             'frameborder': 0
         },
         events: {
