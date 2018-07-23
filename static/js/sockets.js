@@ -1,5 +1,5 @@
 // Initialize socket events ------------->
-socket = io.connect('https://' + document.domain + ':' + location.port);
+socket = io.connect('http://' + document.domain + ':' + location.port);
 
 // Handle Connect ----------------------->
 socket.on('connect', function () {
@@ -69,4 +69,5 @@ socket.on('server-serve-list', function (data) {
         $("#search-list").append("<tr><td>No results found.</td></tr>");
     }
     $("#search").css("display", "block");
+    document.querySelector("#search").scrollTop = 0;
 });
