@@ -5,7 +5,7 @@ https://demo.tutorialzine.com/2015/08/how-to-control-youtubes-video-player-with-
 
 */
 
-var player, socket;
+var player, socket, playback_rates;
 
 window.onYouTubeIframeAPIReady = function () {
     player = new YT.Player('video-placeholder', {
@@ -51,6 +51,13 @@ function updateTimerDisplay() {
     $('#duration').text(formatTime(player.getDuration()));
 }
 
+function showPlaybackRates(playback_rates) {
+    $("#playback-rates").empty();
+    for (i in playback_rates) {
+        $("#playback-rates").append("<button onclick='controlRate("+playback_rates[i]+")' class='btn btn-outline-secondary'>"+playback_rates[i]+"</button>");
+    }
+}
+
 window.initialize = function (event) {
     if (history_video_id != "") {
         event.target.loadVideoById(history_video_id);
@@ -70,11 +77,13 @@ window.initialize = function (event) {
     }, 1000);
 
     //player.setSize({width: $("#resize-video-frame").width, height: $("#resize-video-frame").height});
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
-    $("#page-author").html('~ ' + event.target.getVideoData()["author"]);
+    $("#page-title").html("<a target='_blank' href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
+    $("#page-author").html('<button type="button" class="btn btn-secondary btn-sm" disabled>' + event.target.getVideoData()["author"]+'</button>');
 };
 
 window.stateChange = function (event) {
-    $("#page-title").html("<a href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
-    $("#page-author").html('~ ' + event.target.getVideoData()["author"]);
+    $("#page-title").html("<a target='_blank' href='https://www.youtube.com/watch?v=" + event.target.getVideoData()["video_id"] + "'>" + event.target.getVideoData()["title"] + "</a>");
+    $("#page-author").html('<button type="button" class="btn btn-secondary btn-sm" disabled>' + event.target.getVideoData()["author"]+'</button>');
+    playback_rates = event.target.getAvailablePlaybackRates();
+    showPlaybackRates(playback_rates);
 };

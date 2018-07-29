@@ -30,9 +30,9 @@ def search_yt(query):
 def check_yt(id):
     url = "https://www.googleapis.com/youtube/v3/videos?id="+id+"&key="+API_KEY+"&part=snippet"
     feed = urllib2.urlopen(url).read()
-    res = json.loads(feed)["items"][0]["snippet"]
+    res = json.loads(feed)
     if res != []:
-        return res["title"]
+        return feed
     else:
         return False
 
@@ -45,13 +45,15 @@ clients = []
 def init_db():
     with sqlite3.connect('watch.db') as conn:
         conn.cursor().execute('''CREATE TABLE history
-            (date date, id text)''')
+            (date date, id text, video_data text)''')
         conn.commit()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# deprecated
+"""
 @app.route('/stats')
 def stats():
     with sqlite3.connect('watch.db') as conn:
@@ -79,6 +81,7 @@ def stats():
                 break
 
         return render_template('stats.html', history=hdict)
+"""
 
 @socketio.on('joined')
 def handle_connect():
@@ -89,10 +92,13 @@ def handle_connect():
     join_room(room)
 
     with sqlite3.connect('watch.db') as conn:
-        emit('new-user-sync', {
-            'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall(),
-            'id': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1],
-        }, room=clients[-1])
+        history = conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()
+        last_id = conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()[0][1]
+
+    emit('new-user-sync', {
+        'history': history,
+        'id': last_id,
+    }, room=clients[-1])
 
 @socketio.on('disconnect')
 def handle_dc():
@@ -128,12 +134,21 @@ def play_new(data):
         emit('server-serve-list', {'results': search_yt(data["url"])}, room=request.sid)
     else:
         with sqlite3.connect('watch.db') as conn:
-            #if conn.cursor().execute("SELECT * FROM history WHERE id LIKE '"+yt_id[0][3]+"'").fetchall() == []:
-            conn.cursor().execute('INSERT INTO history VALUES (?,?)',
-                [datetime.datetime.now(), yt_id[0][3]])
+            conn.text_factory = str
+            history = conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()
+            conn.cursor().execute('INSERT INTO history VALUES (?,?,?)',
+                [datetime.datetime.now(), yt_id[0][3], str(check_yt(yt_id[0][3]))])
             conn.commit()
 
-        emit('server-play-new', {'id': yt_id[0][3], 'history': conn.cursor().execute("SELECT * FROM history ORDER BY date DESC").fetchall()}, broadcast=True)
+        emit('server-play-new', {'id': yt_id[0][3], 'history':history}, broadcast=True)
+
+@socketio.on('client-rate')
+def handle_rate(data):
+    emit('server-rate', data["rate"], broadcast=True)
+
+@socketio.on('client-skip')
+def handle_skip_to(data):
+    emit('server-skip', data["time"], broadcast=True)
 
 @socketio.on('client-skip')
 def handle_skip(data):
@@ -143,7 +158,6 @@ def handle_skip(data):
 @socketio.on_error()
 def error_handler(e):
     print(e)
-    pass
 
 @app.errorhandler(404)
 def page_not_found(error):
