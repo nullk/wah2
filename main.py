@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
 """
-    jiejie
-    By Jacob Courtemarche
-
     Libraries required:
     eventlet, flask, flask_socketio, gdata
 """

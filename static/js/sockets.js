@@ -27,9 +27,16 @@ socket.on('connect', function () {
 });
 
 // Load last video from DB -------------->
+function loadLatest(last) {
+    if (last != "") {
+        player.loadVideoById(last);
+        player.playVideo();
+    } 
+} 
 history_video_id = "";
 socket.on('new-user-sync', function (id) {
     history_video_id = id["id"];
+    loadLatest(history_video_id);
     appendHistory(id["history"]);
     $("#search-list").append("No search results.");
 });

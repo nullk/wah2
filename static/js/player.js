@@ -62,8 +62,6 @@ window.initialize = function (event) {
     if (history_video_id != "") {
         event.target.loadVideoById(history_video_id);
         event.target.playVideo();
-    } else {
-        alert("Error: Please initialize database.");
     }
 
     updateProgressBar();
